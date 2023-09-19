@@ -1,0 +1,25 @@
+spring:
+  redis:
+    port: 6379
+    host: localhost
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/hmdp?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=GMT%2B8
+    username: root
+    password: zyx
+  kafka:
+    bootstrap-servers: 192.168.88.128:9092
+    producer:
+      retries: 10
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      group-id: seckillVoucher
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+mybatis-plus:
+  configuration:
+    log-prefix: com.hmdp.log
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+server:
+  port: 8080

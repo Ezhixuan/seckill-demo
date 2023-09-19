@@ -3,3 +3,44 @@
 --- Created by ezhixuan.
 --- DateTime: 2023/9/19 14:31
 ---
+-- 参数列表
+-- 优惠券id
+local voucherId = ARGV[1]
+-- 用户id
+local userId = ARGV[2]
+-- 当前时间
+local currentTime = ARGV[3]
+-- key
+local key = 'seckill:10'
+local orderKey = 'seckill:order'
+
+-- 获取库存值
+local stock = redis.call('hget',key,'stock')
+-- 获取开始时间
+local beginTime = redis.call('hget',key,'beginTime')
+-- 获取结束时间
+local endTime = redis.call('hget',key,'endTime')
+
+local diff = beginTime - currentTime
+if diff > 0 then
+    return 1; -- 活动未开始
+end
+
+diff = endTime - currentTime
+
+if diff < 0 then
+    return 2; -- 活动已结束
+end
+
+if tonumber(stock) <= 0 then
+    return 3; -- 库存不足
+end
+
+if redis.call('sadd', orderKey, userId) ~= 1 then
+    return 4; -- 用户已在购买名单中
+end
+
+-- 扣库存
+redis.call('hincrby', key, 'stock', -1)
+
+return 0; -- 成功
