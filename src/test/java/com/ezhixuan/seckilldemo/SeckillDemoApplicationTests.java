@@ -1,6 +1,5 @@
 package com.ezhixuan.seckilldemo;
 
-import cn.hutool.core.util.StrUtil;
 import cn.hutool.json.JSONUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.ezhixuan.seckilldemo.entity.SeckillVoucher;
@@ -17,13 +16,12 @@ import java.util.Random;
 import javax.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.aop.framework.AopContext;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
-import org.springframework.kafka.annotation.KafkaListener;
-import org.springframework.kafka.core.KafkaTemplate;
 
 @SpringBootTest
 @Slf4j
@@ -33,7 +31,8 @@ class SeckillDemoApplicationTests {
   @Resource private SeckillVoucherService seckillVoucherService;
   @Resource private VoucherService voucherService;
   @Resource private VoucherOrderService voucherOrderService;
-  @Resource private KafkaTemplate<String, String> kafkaTemplate;
+//  @Resource private KafkaTemplate<String, String> kafkaTemplate;
+  @Resource private RabbitTemplate rabbitTemplate;
 
   @Test
   void contextLoads() {}
@@ -230,23 +229,23 @@ class SeckillDemoApplicationTests {
     voucherOrder.setId(orderId);
     voucherOrder.setUserId(userId);
     voucherOrder.setVoucherId(voucherId);
-    kafkaTemplate.send("seckillVoucher", JSONUtil.toJsonStr(voucherOrder));
+    rabbitTemplate.convertAndSend("order.seckill", JSONUtil.toJsonStr(voucherOrder));
     // 3. 返回订单号
     System.out.println("抢购成功！订单号：" + orderId);
   }
 
-  /**
-   * kafka消息监听器
-   *
-   * @param message
-   */
-  @KafkaListener(topics = "seckillVoucher")
-  public void onMessage(String message) {
-    if (StrUtil.isNotBlank(message)) {
-      VoucherOrder voucherOrder = JSONUtil.toBean(message, VoucherOrder.class);
-      proxy.saveOrder(voucherOrder);
-    }
-  }
+//  /**
+//   * kafka消息监听器
+//   *
+//   * @param message
+//   */
+//  @KafkaListener(topics = "seckillVoucher")
+//  public void onMessage(String message) {
+//    if (StrUtil.isNotBlank(message)) {
+//      VoucherOrder voucherOrder = JSONUtil.toBean(message, VoucherOrder.class);
+//      proxy.saveOrder(voucherOrder);
+//    }
+//  }
 
   public void saveOrder(VoucherOrder order) {
     // 初始化一些变量

@@ -22,9 +22,9 @@ import org.springframework.web.bind.annotation.RestController;
  * @create: 2023-09-18 20:59
  */
 @RestController
-@RequestMapping("/seckill")
+@RequestMapping("/voucherOrder")
 @Slf4j
-public class SeckillController {
+public class VoucherOrderController {
 
   @Resource private RedisTemplate<String, Object> redisTemplate;
   @Resource private SeckillVoucherService seckillVoucherService;
@@ -97,5 +97,11 @@ public class SeckillController {
     // 4. 返回订单号
     System.out.println("抢购成功！订单号：" + orderId);
     return "抢购成功！订单号：" + orderId;
+  }
+
+  @GetMapping("/seckill")
+  public String seckillVoucher(){
+    voucherOrderService.seckillVoucher();
+    return "success";
   }
 }
